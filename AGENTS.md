@@ -125,3 +125,11 @@ engram is Hachiflow's company brain (CLI `engram` on PATH; MCP server `engram`).
 Environment note: category `incident` currently requires a hardware signing key, so file incidents as `insight` until one is provisioned.
 
 Database: the brain is the shared Supabase Postgres (project `kkubrtbhomcydotiahnc`), not a local Docker Postgres. Point engram at it through `ENGRAM_DATABASE_URL=postgres://engram_<you>.kkubrtbhomcydotiahnc:<password>@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require`. Always use that session pooler host: a `db.kkubrtbhomcydotiahnc.supabase.co` URL is IPv6-only and engram rewrites it to the wrong region. Each person connects as their own login role (a member of `engram_user`); the full URL lives in the macOS Keychain item `engram-database-url` (read it with `security find-generic-password -s engram-database-url -w`) and never goes in a file, a commit, or an engram entry. The old local instance on `localhost:54330` is stopped and stale since 2026-09-12. If `ENGRAM_DATABASE_URL` is empty engram falls back to that address, so a connection-refused error means your environment is not set. `engram doctor` fails its schema check for non-owner roles by design; `engram init` and schema migrations run as `postgres`.
+
+## CI action freshness
+
+Before changing code or opening/updating a PR, ALWAYS inspect GitHub Actions used
+by repository workflows (including branch-only workflows) and check their upstream
+releases for newer stable versions. Propose available upgrades in a PR, documenting
+compatibility requirements and validation. Do not silently merge or deploy upgrades,
+weaken CI, or replace self-hosted runner selection.
