@@ -133,3 +133,12 @@ by repository workflows (including branch-only workflows) and check their upstre
 releases for newer stable versions. Propose available upgrades in a PR, documenting
 compatibility requirements and validation. Do not silently merge or deploy upgrades,
 weaken CI, or replace self-hosted runner selection.
+
+ALWAYS pin every external GitHub Action and reusable workflow to a full
+40-character commit SHA, with the stable release version in a trailing comment.
+Never use a tag, branch, or abbreviated SHA as the executable reference. Resolve
+release tags through the action's canonical upstream repository and verify the
+commit there before proposing an update. Update the SHA and version comment
+together, and preserve existing immutable pins. This prevents a moved tag from
+silently changing the reviewed action code. Apply this rule to workflows and
+repository-owned composite actions, including branch-only definitions.
