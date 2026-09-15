@@ -142,3 +142,25 @@ commit there before proposing an update. Update the SHA and version comment
 together, and preserve existing immutable pins. This prevents a moved tag from
 silently changing the reviewed action code. Apply this rule to workflows and
 repository-owned composite actions, including branch-only definitions.
+
+## Deployment secrets
+
+All deployment secrets MUST be stored in GitHub Actions environment secrets
+for the exact environment being deployed, such as `production`, `staging`,
+or `development`. Deployment jobs MUST select that GitHub environment.
+Production and non-production credentials MUST be separate. Never use a
+repository-level or organization-level secret as a cross-environment fallback.
+
+GitHub environment secrets are the source of truth. CI injects them into the
+runtime secret store during deployment; a dashboard edit, local file, or
+machine keychain is not an alternative deployment source. Do not commit secret
+values or expose them in logs, command arguments, artifacts, or PR descriptions.
+Temporary deployment files must be private and removed after use. Keep public
+configuration, such as client IDs and URLs, in environment variables or config.
+
+Before deploying, verify that credentials and destination resources belong to
+the selected environment. Fail before changing the running service if required
+secrets are missing or the environment does not match. When migrating existing
+secrets, establish and verify the environment-scoped replacement before removing
+an old source. This rule governs deployment credentials; customer secrets and
+runtime leases continue to follow the product vault contracts.
