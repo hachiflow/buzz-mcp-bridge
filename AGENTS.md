@@ -156,7 +156,7 @@ runtime secret store during deployment; a dashboard edit, local file, or
 machine keychain is not an alternative deployment source. Do not commit secret
 values or expose them in logs, command arguments, artifacts, or PR descriptions.
 Temporary deployment files must be private and removed after use. Keep public
-configuration, such as client IDs and URLs, in environment variables or config.
+configuration, such as client IDs and URLs, in GitHub environment variables or committed config.
 
 Before deploying, verify that credentials and destination resources belong to
 the selected environment. Fail before changing the running service if required
@@ -164,3 +164,36 @@ secrets are missing or the environment does not match. When migrating existing
 secrets, establish and verify the environment-scoped replacement before removing
 an old source. This rule governs deployment credentials; customer secrets and
 runtime leases continue to follow the product vault contracts.
+
+
+### Names, classification and consumers
+
+Use the SAME setting name in each GitHub environment, with independent values:
+`production/WORKOS_API_KEY` and `staging/WORKOS_API_KEY`, never a shared key or
+`PROD_`/`STAGING_` name variants. The job selects its environment explicitly.
+
+Credentials (API tokens, passwords, private keys, signing/encryption keys,
+webhook secrets, credential-bearing database URLs and S3 credential pairs)
+MUST use `secrets.NAME`. Public configuration (client/App/account IDs, service
+URLs, regions, bucket names, feature flags, public keys and public certificates)
+MUST use `vars.NAME` when managed in GitHub. Never disguise a public ID as a
+secret or expose a credential through a variable, build define or public bundle.
+
+Each setting needs a documented consumer and setup command in
+`DEPLOYMENT-CONFIG.md`. Read only the settings that the job or runtime needs.
+Pass secret expressions through step/action inputs or `env`, never interpolate
+`${{ secrets.NAME }}` into shell `run` text. Transfer secrets through stdin or
+private temporary files, clean them up on failure too, and never put their
+values in command arguments. Fail before deployment when required settings are
+missing. Keep optional integration groups explicit and validate their pairs.
+
+Use an `automation` environment for repository automation App private keys,
+with public App IDs in its variables. GitHub's automatically issued
+`github.token` is an exception to manual secret provisioning; restrict its job
+permissions and never store a copy as a custom secret. Build/test jobs without
+an external credential consumer must not receive deployment secrets.
+
+GitHub can fall back to repository or organization secrets of the same name.
+An environment selection alone does not prove isolation. After verifying the
+replacement, remove broader deployment secret sources. Preview jobs must use
+separate resources and must never inherit live Worker secrets or data bindings.
